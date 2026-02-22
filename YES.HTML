@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Olicis Valentine Date</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:wght@700&family=Dancing+Script:wght@600&family=Lato:wght@400;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        :root {
+            --bg-pink: #ffe6ea; 
+            --paper-cream: #fdfbf7;
+            --paper-inner-pink: #ebd4d4;
+            --text-dark: #1a1a1a;
+            --accent-red: #c25e5e;
+            --envelope-color: #dfa5a5;
+            --envelope-dark: #cc8e8e;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--bg-pink);
+            background-image: radial-gradient(#e0bcc3 1px, transparent 1px);
+            background-size: 20px 20px; 
+            font-family: 'Lato', sans-serif;
+            min-height: 100vh;
+            /* Allow scrolling */
+            overflow-y: auto; 
+            overflow-x: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding-top: 100px; /* More space at top */
+            padding-bottom: 50px;
+        }
+
+        /* --- ENVELOPE STYLES --- */
+        .envelope-wrapper {
+            position: relative;
+            width: 300px;
+            height: 200px;
+            cursor: pointer;
+            z-index: 50;
+            margin-bottom: 50px; 
+            transition: transform 0.3s ease;
+        }
+
+        .envelope-wrapper:hover {
+            transform: scale(1.05);
+        }
+
+        .envelope-wrapper.open {
+            cursor: default;
+        }
+        
+        /* Fade envelope out slowly so it doesn't block the view */
+        .envelope-wrapper.open .envelope {
+            animation: fadeOutEnvelope 1s forwards 0.8s;
+        }
+
+        @keyframes fadeOutEnvelope {
+            to { opacity: 0; pointer-events: none; }
+        }
+
+        .envelope {
+            position: relative;
+            width: 100%;
+            height: 100%;
+        }
+
+        .envelope-back {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            height: 100%;
+            background-color: var(--envelope-dark);
+            border-radius: 0 0 10px 10px;
+        }
+
+        .envelope-lid {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100px;
+            z-index: 100;
+            transform-origin: top;
+            transition: transform 0.6s ease-in-out;
+        }
+
+        .envelope-lid::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            border-left: 150px solid transparent;
+            border-right: 150px solid transparent;
+            border-top: 110px solid var(--envelope-color);
+        }
+
+        .envelope-pocket {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 110;
+            border-radius: 0 0 10px 10px;
+            pointer-events: none;
+        }
+
+        .envelope-pocket::before {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0;
+            height: 0;
+            border-style: solid;
+            border-width: 120px 0 0 150px;
+            border-color: transparent transparent transparent var(--envelope-color);
+        }
+
+        .envelope-pocket::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            width: 0;
+            height: 0;
+            border-style: solid;
+            border-width: 0 0 120px 150px;
+            border-color: transparent transparent var(--envelope-color) transparent;
+        }
+
+        .heart-seal {
+            position: absolute;
+            top: 110px;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: var(--accent-red);
+            font-size: 3rem;
+            z-index: 120;
+            text-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            transition: opacity 0.3s;
+        }
+
+        .instruction {
+            position: absolute;
+            bottom: -50px;
+            width: 100%;
+            text-align: center;
+            font-family: 'Dancing Script', cursive;
+            color: var(--accent-red);
+            font-size: 1.8rem;
+            transition: opacity 0.3s;
+        }
+
+        /* --- THE LETTER (PLANNER) CONTENT --- */
+        .letter-content {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            /* Important: Fixed width significantly wider than the envelope */
+            width: 700px; 
+            height: auto;
+            
+            /* Hidden inside envelope state */
+            transform: translate(-50%, -50%) scale(0.05); 
+            opacity: 0;
+            z-index: 5; 
+            transition: all 1s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+        }
+
+        /* --- OPEN STATE ANIMATIONS --- */
+        .envelope-wrapper.open .envelope-lid {
+            transform: rotateX(180deg);
+            z-index: 0;
+        }
+
+        .envelope-wrapper.open .heart-seal,
+        .envelope-wrapper.open .instruction {
+            opacity: 0;
+        }
+
+        /* POP OUT STATE */
+        .envelope-wrapper.open .letter-content {
+            opacity: 1;
+            /* Scale back to 1 (full size 700px) and move up slightly */
+            transform: translate(-50%, -50px) scale(1);
+            z-index: 200; 
+            /* Position relative to page flow once open */
+            top: 100px; 
+        }
+
+        /* --- PLANNER SHEET STYLING --- */
+        .planner-sheet {
+            background-color: var(--paper-cream);
+            width: 100%; /* Fills the 700px container */
+            min-height: 850px;
+            border-radius: 15px;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.2);
+            position: relative;
+            padding: 50px; /* Increased padding */
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        /* --- DECORATIONS & CONTENT (Same as before) --- */
+        .washi-tape {
+            position: absolute;
+            top: -15px;
+            left: 50%;
+            transform: translateX(-50%) rotate(-2deg);
+            width: 150px; /* Made tape wider */
+            height: 40px;
+            background-color: rgba(189, 149, 149, 0.7);
+            opacity: 0.8;
+            z-index: 10;
+        }
+
+        header { text-align: center; margin-bottom: 40px; position: relative; }
+        h1 { font-family: 'Bodoni Moda', serif; font-size: 4rem; color: var(--text-dark); letter-spacing: 3px; margin-bottom: -15px; }
+        h2 { font-family: 'Dancing Script', cursive; font-size: 3.5rem; color: #333; transform: rotate(-3deg); display: inline-block; }
+        .stamp { position: absolute; top: 60px; right: 20px; border: 3px solid var(--accent-red); color: var(--accent-red); padding: 5px 10px; font-family: 'Courier New', monospace; font-weight: bold; font-size: 1rem; transform: rotate(-15deg); border-radius: 5px; opacity: 0.7; }
+
+        .toc-container {
+            background-color: var(--paper-inner-pink);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 40px;
+            position: relative;
+        }
+        .toc-container::before { content: ''; position: absolute; left: 25px; top: 25px; bottom: 25px; width: 4px; background-color: #bf8c8c; border-radius: 2px; }
+        .toc-title { text-align: center; font-family: 'Playfair Display', serif; font-size: 1.8rem; margin-bottom: 25px; color: #2c1a1a; }
+        .toc-list { list-style: none; padding-left: 35px; }
+        .toc-item { display: flex; align-items: center; padding: 15px 0; border-bottom: 1px solid rgba(0,0,0,0.1); color: #4a3b3b; font-size: 1.2rem; cursor: pointer; transition: 0.2s;}
+        .toc-item:hover { color: var(--accent-red); padding-left: 10px; }
+        .icon-box { width: 40px; text-align: center; margin-right: 15px; color: #5c4040; font-size: 1.2rem; }
+
+        .bottom-section { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-top: auto; }
+        .booking-note { background-color: #f0f0f0; padding: 25px; position: relative; transform: rotate(-2deg); box-shadow: 3px 3px 10px rgba(0,0,0,0.15); font-size: 1rem; margin-top: 10px; }
+        .script-title { font-family: 'Dancing Script', cursive; font-size: 2rem; color: #555; margin-bottom: 10px; }
+        .flight-info { display: flex; align-items: flex-start; gap: 15px; }
+        .flight-icon { font-size: 2.2rem; color: #555; }
+        .tag { background-color: #cdaea9; color: #fff; padding: 3px 8px; border-radius: 4px; font-size: 0.8rem; font-weight: bold; margin-right: 5px; }
+        .photo-frame { background: white; padding: 15px 15px 40px 15px; box-shadow: 5px 5px 15px rgba(0,0,0,0.2); transform: rotate(3deg); align-self: center; }
+        .photo-frame img { width: 100%; height: 220px; object-fit: cover; filter: contrast(110%) saturate(110%); }
+
+        .deco { position: absolute; z-index: 5; }
+        .crane-top { top: 40px; left: 30px; font-size: 2.5rem; color: #bfa67a; transform: rotate(-10deg); }
+        .lantern-right { top: 180px; right: -15px; font-size: 3.5rem; color: #d68c8c; }
+        .sakura-bottom { bottom: -30px; left: -30px; font-size: 6rem; color: #eebcbc; opacity: 0.8; }
+
+        /* Side Frames */
+        .side-frame { position: fixed; top: 50%; transform: translateY(-50%); z-index: 40; pointer-events: none; }
+        .side-frame.left { left: 3%; }
+        .side-frame.right { right: 3%; }
+        .tape { position: absolute; top: -15px; left: 50%; transform: translateX(-50%); width: 80px; height: 25px; background-color: rgba(189, 149, 149, 0.6); z-index: 10; }
+        .frame { width: 180px; height: 220px; background-color: white; padding: 10px 10px 45px 10px; box-shadow: 5px 5px 15px rgba(0,0,0,0.15); transition: transform 0.3s; pointer-events: auto; }
+        .frame img { width: 100%; height: 100%; object-fit: cover; border: 1px solid #eee; }
+        .frame:hover { transform: scale(1.1) !important; z-index: 300; }
+        .side-frame.left .frame { transform: rotate(-5deg); }
+        .side-frame.right .frame { transform: rotate(5deg); }
+
+        /* Mobile Adjustments */
+        @media (max-width: 750px) {
+            .letter-content { width: 95vw; } /* Fit screen on mobile */
+            .bottom-section { grid-template-columns: 1fr; }
+            .side-frame { display: none; }
+            h1 { font-size: 3rem; }
+            .planner-sheet { padding: 25px; }
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="side-frame left">
+        <div class="tape"></div>
+        <div class="frame"><img src="nailong4.jpg" alt="Cute"></div>
+    </div>
+    
+    <div class="side-frame right">
+        <div class="tape"></div>
+        <div class="frame"><img src="nailong3.jpg" alt="Cute"></div>
+    </div>
+
+    <div class="envelope-wrapper" onclick="toggleEnvelope()">
+        
+        <div class="letter-content">
+            <div class="planner-sheet">
+                <div class="washi-tape"></div>
+                <i class="fa-brands fa-fly deco crane-top"></i>
+                <div class="deco lantern-right"><i class="fa-solid fa-lightbulb"></i></div>
+                
+                <header>
+                    <h1>OLICIS</h1>
+                    <h2>VALENTINE DATE</h2>
+                    <div class="stamp">MWA</div>
+                </header>
+
+                <section class="toc-container">
+                    <h3 class="toc-title">DATE CONTENTS:</h3>
+                    <ul class="toc-list">
+                        <li class="toc-item"><div class="icon-box"><i class="fa-solid fa-location-dot"></i></div><span>1st Destination: Arroceros</span></li>
+                        <li class="toc-item"><div class="icon-box"><i class="fa-solid fa-location-dot"></i></div><span>2nd Destination: Jones Bridge</span></li>
+                        <li class="toc-item"><div class="icon-box"><i class="fa-solid fa-location-dot"></i></div><span>3rd Destination: Manila Cathedral</span></li>
+                        <li class="toc-item"><div class="icon-box"><i class="fa-solid fa-shirt"></i></div><span>Outfit: PINK</span></li>
+                        <li class="toc-item"><div class="icon-box"><i class="fa-regular fa-calendar-days"></i></div><span>Schedule: 1s:00pm onwards</span></li>
+                    </ul>
+                </section>
+
+                <h3>Little Note</h3>
+                <section class="bottom-section">
+                    <div class="booking-note">
+                        <div class="script-title">To: Olibayah</div>
+                        <div class="flight-info">
+                            <div class="flight-icon"><i class=></i></div>
+                            <div class="flight-details">
+                                <p><span class="tag">Dear Lovey,</span> Happy Valentines my babyyyyyy!! I am glad that you accepted my invitation for the OLICIS Date my loveyy. I'm not a wordy person but I genuinely want you to know that I am really really grateful that I have you and ur mine. I hope you know how much I love and cherish you baby, you're so precious to me that I consider myself soaper lucky that your claiming me as yours. Let this date be your sweet escape to life and let's just enjoy this moment together. I love you really really much my lovey MWAMWAMWAAA
+</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="photo-frame">
+                        <img src="Olicis Hands.jpg" alt="Chureito Pagoda">
+                    </div>
+                </section>
+                <i class="fa-solid fa-fan deco sakura-bottom"></i>
+            </div>
+        </div>
+
+        <div class="envelope">
+            <div class="envelope-back"></div>
+            <div class="envelope-lid"></div>
+            <div class="envelope-pocket"></div>
+            <div class="heart-seal"><i class="fa-solid fa-heart"></i></div>
+            <div class="instruction">Click to Open</div>
+        </div>
+    </div>
+
+    <script>
+        function toggleEnvelope() {
+            const envelope = document.querySelector('.envelope-wrapper');
+            envelope.classList.toggle('open');
+            
+            // Scroll to the top of the letter after opening
+            if(envelope.classList.contains('open')) {
+                setTimeout(() => {
+                    // Slight delay to let animation start
+                    const letter = document.querySelector('.letter-content');
+                    letter.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }, 600);
+            }
+        }
+    </script>
+</body>
+</html>
